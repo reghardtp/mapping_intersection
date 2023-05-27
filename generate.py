@@ -36,5 +36,5 @@ def generate_traces(filename, num_traces):
             writer.writerow([lat, lng])
 
 
-generate_sites('sites.csv', 50)
-generate_traces('traces.csv', 100)
+generate_sites('sites.csv', 5)
+generate_traces('traces.csv', 10)

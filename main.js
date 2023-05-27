@@ -30,24 +30,26 @@ function processSites(data) {
 }
 
 function processTraces(data) {
+    let coordinates = [];
     data.forEach(function(row, index) {
-        if (index < data.length - 1) {
-            let nextRow = data[index + 1];
-            if(row.lat !== null && row.lng !== null && nextRow.lat !== null && nextRow.lng !== null) {
-                let trace = turf.lineString([[row.lng, row.lat], [nextRow.lng, nextRow.lat]]);
-                let totalLength = turf.length(trace, {units: 'meters'});
-                let interval = 100; // Add a point every 100 meters
-                for(let i=0; i<totalLength; i+=interval) {
-                    let interpolatedPoint = turf.along(trace, i, {units: 'meters'});
-                    trace.geometry.coordinates.push([interpolatedPoint.geometry.coordinates[0], interpolatedPoint.geometry.coordinates[1]]);
-                }
-                let geojsonLayer = L.geoJSON(trace);
-                geojsonLayer.feature = trace; // Store the GeoJSON feature directly
-                tracesLayer.addLayer(geojsonLayer);
-            }
+        if(row.lat !== null && row.lng !== null) {
+            coordinates.push([row.lng, row.lat]);
         }
     });
+    
+    let trace = turf.lineString(coordinates);
+    let totalLength = turf.length(trace, {units: 'meters'});
+    let interval = 100; // Add a point every 100 meters
+    for(let i=0; i<totalLength; i+=interval) {
+        let interpolatedPoint = turf.along(trace, i, {units: 'meters'});
+        trace.geometry.coordinates.push([interpolatedPoint.geometry.coordinates[0], interpolatedPoint.geometry.coordinates[1]]);
+    }
+
+    let geojsonLayer = L.geoJSON(trace);
+    geojsonLayer.feature = trace; // Store the GeoJSON feature directly
+    tracesLayer.addLayer(geojsonLayer);
 }
+
 function checkAndCalculateIntersection() {
     if (sitesData !== null && tracesData !== null) {
         calculateIntersection();
@@ -55,25 +57,22 @@ function checkAndCalculateIntersection() {
 }
 
 function calculateIntersection() {
-    console.log("Calculating intersection")
     let intersectionCount = 0;
+
+    let traceLineLayer = tracesLayer.getLayers()[0]; // Assuming there is only one layer
+    let lineCoords = traceLineLayer.feature.geometry.coordinates; // Access the stored GeoJSON feature
+
     sitesLayer.eachLayer(function(siteCircle) {
         let siteLatLng = siteCircle.getLatLng();
         let site = turf.circle([siteLatLng.lng, siteLatLng.lat], 500, { units: 'meters', steps: 100 });
-        console.log(site);
-        tracesLayer.eachLayer(function(traceLineLayer) {
-            let lineCoords = traceLineLayer.feature.geometry.coordinates; // Access the stored GeoJSON feature
-            console.log(lineCoords)
-            for(let i=0; i<lineCoords.length; i++) {
-                let point = turf.point([lineCoords[i][0], lineCoords[i][1]]);
-                console.log(point);
-                if(turf.booleanPointInPolygon(point, site)) {
-                    intersectionCount++;
-                    console.log("Found intersection");
-                    break;
-                }
+
+        for(let i=0; i<lineCoords.length; i++) {
+            let point = turf.point([lineCoords[i][0], lineCoords[i][1]]);
+            if(turf.booleanPointInPolygon(point, site)) {
+                intersectionCount++;
+                break;
             }
-        });
+        }
     });
 
     document.getElementById('intersect_count').innerText = intersectionCount;
