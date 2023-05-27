@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geo Calculation Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+    <script src="https://unpkg.com/papaparse@5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <input type="file" id="sites" accept=".csv" />
+    <input type="file" id="traces" accept=".csv" />
+    <div id="mapid"></div>
+    <h1 id="intersect_count">0</h1>
+
+    <script src="main.js"></script>
+</body>
+</html>

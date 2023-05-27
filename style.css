@@ -1,0 +1,16 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+#mapid {
+    height: 500px;
+}
+
+input[type="file"] {
+    margin: 10px;
+}
+
+#mapid path.leaflet-interactive {
+    pointer-events: none;
+}
